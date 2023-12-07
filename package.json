@@ -1,0 +1,24 @@
+{
+  "name": "realtime-chat",
+  "version": "1.0.0",
+  "description": "A tiny, zero-dependency real-time chat application using WebRTC.",
+  "main": "rtc.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/akash-singh8/realtime-chat.git"
+  },
+  "keywords": [
+    "realtime",
+    "chat",
+    "webrtc"
+  ],
+  "author": "Akash Singh",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/akash-singh8/realtime-chat/issues"
+  },
+  "homepage": "https://github.com/akash-singh8/realtime-chat#readme"
+}
