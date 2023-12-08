@@ -18,6 +18,18 @@ type[0].addEventListener("click", () => {
   handleSender();
 });
 
+type[1].addEventListener("click", () => {
+  if (flag) {
+    return alert(`Already logged as ${flag}`);
+  }
+
+  type[1].style.backgroundColor = "rgb(255, 216, 168)";
+  copy.innerText = "copy sdp answer";
+  flag = "receiver";
+
+  handleReceiver();
+});
+
 // function to add chat element to DOM
 const addChat = (message, type) => {
   const p = document.createElement("p");
@@ -107,4 +119,65 @@ const handleSender = async () => {
   });
 
   console.log("Offers or SDPs :", offers);
+};
+
+// function to setup WebRTC connection at the receiver's end
+const handleReceiver = async () => {
+  const offer = prompt("Enter the offer SDP token:");
+  console.log("Offer received :", offer);
+
+  if (offer.length < 20) {
+    alert("Can't proceed without offer sdp");
+    return;
+  }
+
+  const answers = [];
+
+  rtc.onicecandidate = (e) => {
+    answers.push(rtc.localDescription);
+  };
+
+  rtc.ondatachannel = (e) => {
+    rtc.dc = e.channel;
+
+    rtc.dc.onmessage = (e) => {
+      console.log("Received message :", e.data);
+      addChat(e.data, "receiver");
+    };
+
+    rtc.dc.onopen = (e) => {
+      console.log("Connection Opened!");
+      copy.innerText = "connection established!";
+      connection = true;
+    };
+  };
+
+  try {
+    await rtc.setRemoteDescription(JSON.parse(offer));
+    console.log("Successfully set Remote Description or Offer!");
+  } catch (e) {
+    console.error(e);
+    console.error("Error while setting offer");
+  }
+
+  try {
+    const answer = await rtc.createAnswer();
+    console.log("Created answer!");
+
+    await rtc.setLocalDescription(answer);
+    console.log("Set local description");
+  } catch (err) {
+    console.error(err);
+    console.error("Error while creating answer!");
+  }
+
+  copy.addEventListener("click", () => {
+    const answer = answers[answers.length - 1];
+    console.log("Answer copied :", answer);
+
+    navigator.clipboard.writeText(JSON.stringify(answer));
+    copy.innerText = "copied!!";
+  });
+
+  console.log("Answers or SDPs :", answers);
 };
