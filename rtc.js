@@ -5,6 +5,7 @@ const copy = document.querySelector(".sdp button");
 const chatbox = document.querySelector(".chatbox");
 let flag = "";
 let connection = false;
+let sendMessage; // it will going to be a function which sends message to other peer
 
 type[0].addEventListener("click", () => {
   if (flag) {
@@ -53,6 +54,7 @@ document.querySelector(".message button").addEventListener("click", () => {
   }
 
   addChat(message.value, "sender");
+  sendMessage(message.value);
   message.value = "";
 });
 
@@ -82,6 +84,10 @@ const handleSender = async () => {
     console.log("Receiver Connected ");
     copy.innerText = "connection established!";
     connection = true;
+  };
+
+  sendMessage = (message) => {
+    dc.send(message);
   };
 
   const offers = [];
@@ -150,6 +156,10 @@ const handleReceiver = async () => {
       copy.innerText = "connection established!";
       connection = true;
     };
+  };
+
+  sendMessage = (message) => {
+    rtc.dc.send(message);
   };
 
   try {
