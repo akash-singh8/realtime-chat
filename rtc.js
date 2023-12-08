@@ -43,7 +43,8 @@ const addChat = (message, type) => {
 };
 
 // function to handle message and send it to other peer
-document.querySelector(".message button").addEventListener("click", () => {
+const handleMessage = (event) => {
+  event.preventDefault();
   const message = document.querySelector(".message input");
 
   if (!connection) {
@@ -56,7 +57,7 @@ document.querySelector(".message button").addEventListener("click", () => {
   addChat(message.value, "sender");
   sendMessage(message.value);
   message.value = "";
-});
+};
 
 // function to set sender's remote description
 const setRemoteDesc = (answer) => {

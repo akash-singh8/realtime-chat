@@ -34,10 +34,10 @@
           <div class="chatbox">
             <!-- Message will be added here -->
           </div>
-          <div>
+          <form onsubmit="handleMessage(event)">
             <input type="text" placeholder="Enter your message" />
-            <button>Send</button>
-          </div>
+            <button type="submit">Send</button>
+          </form>
         </div>
       </section>
     </div>
