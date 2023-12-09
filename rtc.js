@@ -1,4 +1,13 @@
-const rtc = new RTCPeerConnection();
+const servers = {
+  iceServers: [
+    {
+      urls: ["stun:stun1.l.google.com:19302", "stun:stun2.l.google.com:19302"],
+    },
+  ],
+  iceCandidatePoolSize: 10,
+};
+
+const rtc = new RTCPeerConnection(servers);
 
 const type = document.querySelectorAll(".type div button");
 const copy = document.querySelector(".sdp button");
