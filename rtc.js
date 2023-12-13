@@ -69,16 +69,20 @@ const handleMessage = (event) => {
 };
 
 // function to set sender's remote description
-const setRemoteDesc = (answer) => {
-  rtc
-    .setRemoteDescription(JSON.parse(answer))
-    .then((e) => {
-      console.log("Set sender remote description!!!");
-    })
-    .catch((e) => {
-      console.error("Error while setting sender remote description: ");
-      console.error(e);
+const setRemoteDesc = async (answer) => {
+  try {
+    await rtc.setRemoteDescription(answer);
+    console.log("Set sender remote description!!!");
+
+    const iceCandidates = JSON.parse(prompt("Add remote ice candidates :"));
+    iceCandidates.forEach((iceCand) => {
+      const ice = new RTCIceCandidate(iceCand);
+      rtc.addIceCandidate(ice);
     });
+  } catch (e) {
+    console.error("Error while setting sender remote description: ");
+    console.error(e);
+  }
 };
 
 // function to setup WebRTC connection at the sender's end
@@ -100,15 +104,16 @@ const handleSender = async () => {
     dc.send(message);
   };
 
-  const offers = [];
+  let iceCandidates = [];
+  let offer;
 
   rtc.onicecandidate = (e) => {
-    offers.push(rtc.localDescription);
+    e.candidate && iceCandidates.push(e.candidate.toJSON());
   };
 
   try {
-    const offer = await rtc.createOffer();
-    console.log("Created offer!");
+    offer = await rtc.createOffer();
+    console.log("Offer :", offer);
 
     await rtc.setLocalDescription(offer);
     console.log("Set local description");
@@ -119,7 +124,6 @@ const handleSender = async () => {
 
   copy.addEventListener("click", () => {
     if (copy.innerText === "copy sdp offer") {
-      const offer = offers[offers.length - 1];
       console.log("Offer copied :", offer);
 
       navigator.clipboard.writeText(JSON.stringify(offer));
@@ -129,12 +133,12 @@ const handleSender = async () => {
         copy.innerText = "add answer sdp";
       }, 1000);
     } else {
-      const answer = prompt("Enter the answer sdp:");
-      if (answer.length > 50) setRemoteDesc(answer);
+      const answer = JSON.parse(prompt("Enter the answer sdp"));
+      if (answer) setRemoteDesc(answer);
     }
   });
 
-  console.log("Offers or SDPs :", offers);
+  console.log("Ice Candidates :", iceCandidates);
 };
 
 // function to setup WebRTC connection at the receiver's end
@@ -147,10 +151,11 @@ const handleReceiver = async () => {
     return;
   }
 
-  const answers = [];
+  const iceCandidates = [];
+  let answer;
 
   rtc.onicecandidate = (e) => {
-    answers.push(rtc.localDescription);
+    e.candidate && iceCandidates.push(e.candidate.toJSON());
   };
 
   rtc.ondatachannel = (e) => {
@@ -175,14 +180,22 @@ const handleReceiver = async () => {
   try {
     await rtc.setRemoteDescription(JSON.parse(offer));
     console.log("Successfully set Remote Description or Offer!");
+
+    const remoteIceCandidates = JSON.parse(
+      prompt("Enter all ice candidates :")
+    );
+    remoteIceCandidates.forEach((iceCand) => {
+      const ice = new RTCIceCandidate(iceCand);
+      rtc.addIceCandidate(ice);
+    });
   } catch (e) {
     console.error(e);
     console.error("Error while setting offer");
   }
 
   try {
-    const answer = await rtc.createAnswer();
-    console.log("Created answer!");
+    answer = await rtc.createAnswer();
+    console.log("Answer :", answer);
 
     await rtc.setLocalDescription(answer);
     console.log("Set local description");
@@ -192,12 +205,11 @@ const handleReceiver = async () => {
   }
 
   copy.addEventListener("click", () => {
-    const answer = answers[answers.length - 1];
     console.log("Answer copied :", answer);
 
     navigator.clipboard.writeText(JSON.stringify(answer));
     copy.innerText = "copied!!";
   });
 
-  console.log("Answers or SDPs :", answers);
+  console.log("Ice Candidates :", iceCandidates);
 };
